@@ -6,7 +6,7 @@
 // 4:plain
 // 5:ground
 // 6:display
-// 7:up
+// 7:fade
 
 import processing.opengl.*;
 import ddf.minim.Minim;
@@ -78,11 +78,13 @@ public void setup()
 }
 
 public void draw() {
-  int millis = millis() - offset;
+  final int millis = millis() - offset;
   float beat = (float)(millis % (60000 / SOUND_BPM)) / (60000 / SOUND_BPM);
 
-  int part = millis / PART_LENGTH;
-  boolean partChanged = (part != previousPart);
+  final int part = millis / PART_LENGTH;
+  final boolean partChanged = (part != previousPart);
+
+  float partPosition = (float)(millis - PART_LENGTH * part) / PART_LENGTH;
 
   capture.update();
 
@@ -129,9 +131,9 @@ public void draw() {
     image(image, 0, 0);
   }
 
-  if(!partChanged) {
+  if(!partChanged && part < MAX_PARTS) {
     // blur
-    tint(color(255), 180);
+    tint(color(255), part < 7 ? 180 : 180 * (1 - partPosition));
     image(previous, 0, 0);
     noTint();
   }
@@ -151,7 +153,7 @@ public void draw() {
         translate(400 * i, 200, -400 + abs(i) * 200);
         rotateY(-i * 0.25 * PI);
         scale(200, 150, 0);
-        tint(color(192), 255);
+        tint(color(192), part == 6 ? 255 : 255 * (1 - partPosition));
         beginShape();
         texture(previous);
         vertex(-1,  1, 0, width,      0);
@@ -195,10 +197,6 @@ public void draw() {
     directionalLight(255, 255, 255, 0, -1, 0);
 
     pushMatrix();
-    if(part >= 7) {
-      // up
-      translate(0, 200.0 * min((float)(millis - PART_LENGTH * 7) / PART_LENGTH, 1.0), 0);
-    }
     for(int i = 0; i < 3; ++i) {
       PBvh bvh = bvhs[i];
       int c = COLORS[i];
@@ -223,6 +221,12 @@ public void draw() {
   }
   previous.updatePixels();
   updatePixels();
+
+  if(part == 7) {
+    // fade
+    fill(color(255), 255 * partPosition);
+    rect(0, 0, width, height);
+  }
 
   previousPart = part;
 }
