@@ -66,18 +66,21 @@ public void setup()
   ar = new MultiMarker(this, width, height, "camera_para.dat", NyAR4PsgConfig.CONFIG_PSG);
   marker = ar.addARMarker("marker.dat", 80);
 
-  delay(2000);
-
   minim = new Minim(this);
   player = minim.loadFile("Perfume_globalsite_sound.wav");
-  player.play();
-
-  offset = millis();
 
   loop();
 }
 
 public void draw() {
+  if(millis() < 1000) {
+    return;
+  }
+  else if(!player.isPlaying()) {
+    player.play();
+    offset = millis();
+  }
+
   final int millis = millis() - offset;
   float beat = (float)(millis % (60000 / SOUND_BPM)) / (60000 / SOUND_BPM);
 
