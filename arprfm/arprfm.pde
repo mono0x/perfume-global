@@ -29,6 +29,8 @@ final int[] COLORS = new int[] {
   color(255, 120, 160),
 };
 
+boolean showFrameRate = false;
+
 Minim minim;
 AudioPlayer player;
 
@@ -39,6 +41,8 @@ PImage previous;
 
 MultiMarker ar;
 int marker;
+
+PFont font;
 
 int offset;
 
@@ -65,6 +69,8 @@ public void setup()
 
   ar = new MultiMarker(this, width, height, "camera_para.dat", NyAR4PsgConfig.CONFIG_PSG);
   marker = ar.addARMarker("marker.dat", 80);
+
+  font = loadFont("Meiryo-24.vlw");
 
   minim = new Minim(this);
   player = minim.loadFile("Perfume_globalsite_sound.wav");
@@ -229,6 +235,12 @@ public void draw() {
     // fade
     fill(color(255), 255 * partPosition);
     rect(0, 0, width, height);
+  }
+
+  fill(color(255));
+  textFont(font, 24);
+  if(showFrameRate) {
+    text("FPS:" + round(frameRate), 4, 28);
   }
 
   previousPart = part;
