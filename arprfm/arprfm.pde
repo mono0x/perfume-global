@@ -44,7 +44,8 @@ int marker;
 
 PFont font;
 
-int offset;
+int offset = 0;
+boolean started = false;
 
 int previousPart = -1;
 
@@ -82,9 +83,10 @@ public void draw() {
   if(millis() < 1000) {
     return;
   }
-  else if(!player.isPlaying()) {
+  else if(!started && !player.isPlaying()) {
     player.play();
     offset = millis();
+    started = true;
   }
 
   final int millis = millis() - offset;
