@@ -69,7 +69,7 @@ public void setup()
   previous = new PImage(width, height, RGB);
 
   ar = new MultiMarker(this, width, height, "camera_para.dat", NyAR4PsgConfig.CONFIG_PSG);
-  marker = ar.addARMarker(loadImage("marker.png"), 320, 320, 80);
+  marker = ar.addARMarker(loadImage("marker.png"), 16, 25, 80);
 
   font = loadFont("Meiryo-24.vlw");
 
