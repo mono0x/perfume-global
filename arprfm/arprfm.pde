@@ -284,7 +284,7 @@ private void drawModels(int millis) {
   for(int i = 0; i < 3; ++i) {
     PBvh bvh = bvhs[i];
     int c = COLORS[i];
-    int alpha = millis < SOUND_LENGTH ? 255 : 255 - min((millis - SOUND_LENGTH) / 8, 255);
+    int alpha = millis < SOUND_LENGTH ? 255 : 255 - min((millis - SOUND_LENGTH) * 255 / 5000, 255);
 
     bvh.update(millis);
     if(alpha > 0) {
