@@ -247,6 +247,11 @@ public void keyPressed() {
   if(key == 'd') {
     debug = !debug;
   }
+  else if(key >= '1' && key <= '1' + MAX_PARTS) {
+    int pos = (key - '1') * PART_LENGTH;
+    player.cue(pos);
+    offset = millis() - pos;
+  }
 }
 
 public void stop() {
