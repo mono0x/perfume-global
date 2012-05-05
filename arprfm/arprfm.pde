@@ -1,13 +1,3 @@
-
-// 0:normal
-// 1:invert
-// 2:mosaic
-// 3:normal
-// 4:plain
-// 5:ground
-// 6:display
-// 7:fade
-
 import processing.opengl.*;
 import ddf.minim.Minim;
 import ddf.minim.AudioPlayer;
@@ -19,6 +9,15 @@ final int SOUND_LENGTH = 64247;
 final int PART_LENGTH  = (60000 * 4 * 4 / SOUND_BPM);
 final int MAX_PARTS    = SOUND_LENGTH / PART_LENGTH;
 final int CELL_SIZE    = 64;
+
+final int PART_NORMAL  = 0;
+final int PART_INVERT  = 1;
+final int PART_MOSAIC  = 2;
+final int PART_PLAIN   = 3;
+final int PART_GROUND  = 4;
+final int PART_DISPLAY = 5;
+final int PART_LASER   = 6;
+final int PART_MIX     = 7;
 
 BvhParser parserA = new BvhParser();
 PBvh[] bvhs = new PBvh[3];
@@ -90,12 +89,11 @@ public void draw() {
   }
 
   final int millis = millis() - offset;
-  float beat = (float)(millis % (60000 / SOUND_BPM)) / (60000 / SOUND_BPM);
 
   final int part = millis / PART_LENGTH;
   final boolean partChanged = (part != previousPart);
 
-  float partPosition = (float)(millis - PART_LENGTH * part) / PART_LENGTH;
+  final float partPosition = (float)(millis - PART_LENGTH * part) / PART_LENGTH;
 
   capture.update();
 
@@ -105,14 +103,12 @@ public void draw() {
 
   ar.detect(image);
 
-  if(part == 1) {
-    // invert
+  if(part == PART_INVERT) {
     background(255);
     image(image, 0, 0);
     filter(INVERT);
   }
-  else if(part == 2) {
-    // mosaic
+  else if(part == PART_MOSAIC) {
     background(255);
     loadPixels();
     image.loadPixels();
@@ -130,7 +126,10 @@ public void draw() {
     image.updatePixels();
     updatePixels();
   }
-  else if(part == 4) {
+  else if(part == PART_PLAIN) {
+    background(0);
+  }
+  else if(part == PART_LASER) {
     background(0);
   }
   else if(part >= MAX_PARTS) {
@@ -144,7 +143,7 @@ public void draw() {
 
   if(!partChanged && part < MAX_PARTS) {
     // blur
-    tint(color(255), part < 7 ? 180 : 180 * (1 - partPosition));
+    tint(color(255), part < PART_MIX ? 180 : 180 * (1 - partPosition));
     image(previous, 0, 0);
     noTint();
   }
@@ -157,14 +156,14 @@ public void draw() {
     pushMatrix();
     scale(0.5, 0.5, 0.5);
 
-    if(part == 6 || part == 7) {
+    if(part == PART_DISPLAY || part == PART_LASER) {
       // display
       for(int i = -1; i <= 1; ++i) {
         pushMatrix();
         translate(400 * i, 200, -400 + abs(i) * 200);
         rotateY(-i * 0.25 * PI);
         scale(200, 150, 0);
-        tint(color(192), part == 6 ? 255 : 255 * (1 - partPosition));
+        tint(color(192), 255);
         beginShape();
         texture(previous);
         vertex(-1,  1, 0, width,      0);
@@ -177,7 +176,7 @@ public void draw() {
       }
     }
 
-    if(part >= 4 && part < MAX_PARTS) {
+    if(part >= PART_PLAIN && part < MAX_PARTS) {
       // ground
       pushMatrix();
       scale(30, 0, 30);
@@ -186,7 +185,7 @@ public void draw() {
           pushMatrix();
           translate(2 * x, 0, 2 * z);
           int i = 4 - (max(abs(x), abs(z)) + millis / 100) % 5;
-          if(part == 4) {
+          if(part == PART_PLAIN) {
             fill(color(255));
           }
           else {
@@ -233,12 +232,6 @@ public void draw() {
   }
   previous.updatePixels();
   updatePixels();
-
-  if(part == 7) {
-    // fade
-    fill(color(255), 255 * partPosition);
-    rect(0, 0, width, height);
-  }
 
   textFont(font, 24);
   if(debug) {
