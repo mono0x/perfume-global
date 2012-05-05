@@ -208,6 +208,7 @@ public void draw() {
     directionalLight(255, 255, 255, 0, -1, 0);
 
     pushMatrix();
+    scale(-1, 1, -1);
     for(int i = 0; i < 3; ++i) {
       PBvh bvh = bvhs[i];
       int c = COLORS[i];
