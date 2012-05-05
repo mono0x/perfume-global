@@ -235,18 +235,26 @@ private void drawDisplay() {
 }
 
 private void drawGround(int millis, boolean plain) {
+  final int cycle = 60000 / SOUND_BPM;
   pushMatrix();
   scale(30, 0, 30);
   for(int z = -5; z <= 5; ++z) {
     for(int x = -5; x <= 5; ++x) {
       pushMatrix();
       translate(2 * x, 0, 2 * z);
-      int i = 4 - (max(abs(x), abs(z)) + millis / 100) % 5;
       if(plain) {
+        noStroke();
         fill(color(255));
       }
       else {
-        fill(i % 2 == 0 ? COLORS[i / 2] : color(255), 192);
+        if(max(abs(x), abs(z)) == millis % cycle / (cycle / 6)) {
+          stroke(color(0));
+          fill(color(255), 255);
+        }
+        else {
+          noStroke();
+          noFill();
+        }
       }
       beginShape();
       vertex(-1, 0, -1);
