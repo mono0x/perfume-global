@@ -90,6 +90,7 @@ public void draw() {
   }
 
   final int millis = millis() - offset;
+  final int realPart = min(millis / PART_LENGTH, PART_WHITE);
   final int part = virtualPart(millis);
   final boolean partChanged = (part != previousPart);
 
@@ -124,7 +125,7 @@ public void draw() {
     }
 
     if(part == PART_LASER) {
-      drawLaser(millis);
+      drawLaser(millis, realPart != PART_LASER);
     }
 
     drawModels(millis);
@@ -259,17 +260,30 @@ private void drawGround(int millis, boolean plain) {
   popMatrix();
 }
 
-private void drawLaser(int millis) {
+private void drawLaser(int millis, boolean extra) {
+  final int cycle = 60000 / SOUND_BPM;
+  stroke(color(0, 255, 0), 228);
   pushMatrix();
   for(int i = -1; i <= 1; i += 2) {
     pushMatrix();
-    stroke(color(0, 255, 0), 228);
     translate(i * 200, 0, -500);
-    for(int j = 0; j < 10; ++j) {
-      float rad = millis % 100 * (PI / 10) / 100 + j * (PI / 10);
-      line(0, 0, 0, cos(rad) * 800, sin(rad) * 800, 2000);
+    for(int j = 0, n = 16; j < n; ++j) {
+      float rad = millis % cycle * (PI / n) / cycle + j * (PI / n);
+      if(rad > PI) {
+        rad -= PI;
+      }
+      if(i < 0) {
+        rad = PI - rad;
+      }
+      line(0, 0, 0, 800 * cos(rad), 800 * sin(rad), 2000);
     }
     popMatrix();
+  }
+  if(extra) {
+    for(int i = 0; i < 8; ++i) {
+      float rad = random(PI);
+      line(0, 800, -500, 400 * cos(rad), 0, 400 * sin(rad));
+    }
   }
   popMatrix();
 }
