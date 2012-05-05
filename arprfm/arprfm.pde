@@ -18,6 +18,7 @@ final int PART_GROUND  = 4;
 final int PART_DISPLAY = 5;
 final int PART_LASER   = 6;
 final int PART_MIX     = 7;
+final int PART_WHITE   = 8;
 
 BvhParser parserA = new BvhParser();
 PBvh[] bvhs = new PBvh[3];
@@ -89,11 +90,8 @@ public void draw() {
   }
 
   final int millis = millis() - offset;
-
-  final int part = millis / PART_LENGTH;
+  final int part = virtualPart(millis);
   final boolean partChanged = (part != previousPart);
-
-  final float partPosition = (float)(millis - PART_LENGTH * part) / PART_LENGTH;
 
   capture.update();
 
@@ -131,8 +129,11 @@ public void draw() {
   }
   else if(part == PART_LASER) {
     background(0);
+    image(image, 0, 0);
+    fill(color(0), 128);
+    rect(0, 0, width, height);
   }
-  else if(part >= MAX_PARTS) {
+  else if(part == PART_WHITE) {
     background(255);
   }
   else {
@@ -141,9 +142,9 @@ public void draw() {
     image(image, 0, 0);
   }
 
-  if(!partChanged && part < MAX_PARTS) {
+  if(!partChanged && part != PART_WHITE) {
     // blur
-    tint(color(255), part < PART_MIX ? 180 : 180 * (1 - partPosition));
+    tint(color(255), 180);
     image(previous, 0, 0);
     noTint();
   }
@@ -176,7 +177,7 @@ public void draw() {
       }
     }
 
-    if(part >= PART_PLAIN && part < MAX_PARTS) {
+    if(part >= PART_PLAIN && part <= PART_LASER) {
       // ground
       pushMatrix();
       scale(30, 0, 30);
@@ -203,9 +204,25 @@ public void draw() {
       popMatrix();
     }
 
+    if(part == PART_LASER) {
+      pushMatrix();
+      for(int i = -1; i <= 1; i += 2) {
+        pushMatrix();
+        stroke(color(0, 255, 0), 228);
+        translate(i * 200, 0, -500);
+        for(int j = 0; j < 10; ++j) {
+          float rad = millis % 100 * (PI / 10) / 100 + j * (PI / 10);
+          line(0, 0, 0, cos(rad) * 800, sin(rad) * 800, 2000);
+        }
+        popMatrix();
+      }
+      popMatrix();
+    }
+
     lights();
     directionalLight(255, 255, 255, 0, -1, 0);
 
+    noStroke();
     pushMatrix();
     scale(-1, 1, -1);
     for(int i = 0; i < 3; ++i) {
@@ -247,8 +264,11 @@ public void keyPressed() {
   if(key == 'd') {
     debug = !debug;
   }
-  else if(key >= '1' && key <= '1' + MAX_PARTS) {
+  else if(key >= '1' && key <= '1' + PART_WHITE) {
     int pos = (key - '1') * PART_LENGTH;
+    if(!player.isPlaying()) {
+      player.play();
+    }
     player.cue(pos);
     offset = millis() - pos;
   }
@@ -257,6 +277,22 @@ public void keyPressed() {
 public void stop() {
   capture.stop();
   super.stop();
+}
+
+private int virtualPart(int millis) {
+  int part = min(millis / PART_LENGTH, PART_WHITE);
+  if(part != PART_MIX) {
+    return part;
+  }
+  float p = (float)(millis - PART_MIX * PART_LENGTH) / PART_LENGTH;
+  if(p <= 0.5) {
+    return PART_LASER;
+  }
+  part = floor((p - 0.5) / 0.5 * MAX_PARTS);
+  if(part == PART_MIX) {
+    return PART_WHITE;
+  }
+  return part;
 }
 
 private void invertRect(int[] p, int x, int y, int w, int h) {
