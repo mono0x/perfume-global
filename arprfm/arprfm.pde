@@ -29,7 +29,7 @@ final int[] COLORS = new int[] {
   color(255, 120, 160),
 };
 
-boolean showFrameRate = false;
+boolean debug = false;
 
 Minim minim;
 AudioPlayer player;
@@ -237,13 +237,20 @@ public void draw() {
     rect(0, 0, width, height);
   }
 
-  fill(color(255));
   textFont(font, 24);
-  if(showFrameRate) {
-    text("FPS:" + round(frameRate), 4, 28);
+  if(debug) {
+    debugText("FPS:" + round(frameRate), 4, 28);
+    debugText("POS:" + millis, 4, 56);
+    debugText("PART:" + part, 4, 84);
   }
 
   previousPart = part;
+}
+
+public void keyPressed() {
+  if(key == 'd') {
+    debug = !debug;
+  }
 }
 
 public void stop() {
@@ -261,3 +268,16 @@ private void invertRect(int[] p, int x, int y, int w, int h) {
   }
 }
 
+private void debugText(String text, int x, int y) {
+  fill(color(0));
+  for(int dy = -1; dy <= 1; ++dy) {
+    for(int dx = -1; dx <= 1; ++dx) {
+      if(dx == 0 && dy == 0) {
+        continue;
+      }
+      text(text, x + dx, y + dy);
+    }
+  }
+  fill(color(255));
+  text(text, x, y);
+}
