@@ -1,7 +1,6 @@
-import processing.opengl.*;
 import ddf.minim.Minim;
 import ddf.minim.AudioPlayer;
-import JMyron.JMyron;
+import processing.video.Capture;
 import jp.nyatla.nyar4psg.MultiMarker;
 
 final int SOUND_BPM    = 130;
@@ -34,9 +33,7 @@ boolean debug = false;
 Minim minim;
 AudioPlayer player;
 
-JMyron capture;
-PImage image;
-
+Capture capture;
 PImage previous;
 
 MultiMarker ar;
@@ -51,7 +48,7 @@ int previousPart = -1;
 
 public void setup()
 {
-  size(640, 480, P3D);
+  size(864, 486, P3D);
   background(0);
   //smooth();
   frameRate(30);
@@ -61,11 +58,7 @@ public void setup()
   bvhs[1] = new PBvh(loadStrings("aachan.bvh"));
   bvhs[2] = new PBvh(loadStrings("kashiyuka.bvh"));
 
-  capture = new JMyron();
-  image = new PImage(width, height, RGB);
-  capture.start(width, height);
-  capture.findGlobs(0);
-
+  capture = new Capture(this, width, height, 30);
   previous = new PImage(width, height, RGB);
 
   ar = new MultiMarker(this, width, height, "camera_para.dat", NyAR4PsgConfig.CONFIG_PSG);
@@ -94,15 +87,9 @@ public void draw() {
   final int part = virtualPart(millis);
   final boolean partChanged = (part != previousPart);
 
-  capture.update();
+  ar.detect(capture);
 
-  image.loadPixels();
-  capture.imageCopy(image.pixels);
-  image.updatePixels();
-
-  ar.detect(image);
-
-  drawBackground(part, image);
+  drawBackground(part, capture);
 
   if(!partChanged && part != PART_WHITE) {
     applyBlur();
@@ -161,9 +148,8 @@ public void keyPressed() {
   }
 }
 
-public void stop() {
-  capture.stop();
-  super.stop();
+public void captureEvent(Capture c) {
+  c.read();
 }
 
 private void applyBlur() {
