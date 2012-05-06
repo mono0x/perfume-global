@@ -48,9 +48,8 @@ int previousPart = -1;
 
 public void setup()
 {
-  size(864, 486, P3D);
+  size(640, 480, P3D);
   background(0);
-  //smooth();
   frameRate(30);
   hint(ENABLE_DEPTH_TEST);
 
@@ -73,7 +72,7 @@ public void setup()
 }
 
 public void draw() {
-  if(millis() < 1000) {
+  if(!capture.available() || millis() < 1000) {
     return;
   }
   else if(!started && !player.isPlaying()) {
@@ -87,16 +86,15 @@ public void draw() {
   final int part = virtualPart(millis);
   final boolean partChanged = (part != previousPart);
 
+  capture.read();
   ar.detect(capture);
 
   drawBackground(part, capture);
 
   if(ar.isExistMarker(marker)) {
     ar.beginTransform(marker);
-
-    rotateX(HALF_PI);
-
     pushMatrix();
+    rotateX(HALF_PI);
     scale(0.5, 0.5, 0.5);
 
     if(part == PART_DISPLAY || part == PART_LASER) {
@@ -114,7 +112,6 @@ public void draw() {
     drawModels(millis);
 
     popMatrix();
-
     ar.endTransform();
   }
 
@@ -144,10 +141,6 @@ public void keyPressed() {
   }
 }
 
-public void captureEvent(Capture c) {
-  c.read();
-}
-
 private void drawBackground(int part, PImage image) {
   if(part == PART_INVERT) {
     background(255);
@@ -164,6 +157,7 @@ private void drawBackground(int part, PImage image) {
         if(random(1000) < 1) {
           c = blendColor(color(255), c, SUBTRACT);
         }
+        c = blendColor(c, color(64), SUBTRACT);
         fill(c);
         rect(x * 16, y * 16, 16, 16);
       }
@@ -217,18 +211,13 @@ private void drawGround(int millis, boolean plain) {
       pushMatrix();
       translate(2 * x, 0, 2 * z);
       if(plain) {
-        noStroke();
         fill(color(255));
+        noStroke();
       }
       else {
-        if(max(abs(x), abs(z)) == millis % cycle / (cycle / 6)) {
-          stroke(color(0));
-          fill(color(255), 255);
-        }
-        else {
-          noStroke();
-          noFill();
-        }
+        int alpha = (max(abs(x), abs(z)) - millis % cycle / (cycle / 6) + 9) % 6 * 50;
+        fill(color(255), alpha);
+        stroke(color(0));
       }
       beginShape();
       vertex(-1, 0, -1);
