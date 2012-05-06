@@ -167,7 +167,6 @@ private void drawBackground(int part, PImage image) {
   else if(part == PART_MOSAIC) {
     background(255);
     loadPixels();
-    image.loadPixels();
     for(int y = 0; y < height / 16; ++y) {
       for(int x = 0; x < width / 16; ++x) {
         int c = image.pixels[(x * 16 + floor(random(16))) + (y * 16 + floor(random(16))) * width];
@@ -180,7 +179,6 @@ private void drawBackground(int part, PImage image) {
       }
     }
     image.updatePixels();
-    updatePixels();
   }
   else if(part == PART_PLAIN) {
     background(0);
@@ -346,10 +344,8 @@ private void debugText(String text, int x, int y) {
 
 private void saveScreen(PImage image) {
   loadPixels();
-  image.loadPixels();
   for(int i = 0, n = width * height; i < n; ++i) {
     image.pixels[i] = pixels[i];
   }
   image.updatePixels();
-  updatePixels();
 }
