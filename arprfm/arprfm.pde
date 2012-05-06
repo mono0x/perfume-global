@@ -91,10 +91,6 @@ public void draw() {
 
   drawBackground(part, capture);
 
-  if(!partChanged && part != PART_WHITE) {
-    applyBlur();
-  }
-
   if(ar.isExistMarker(marker)) {
     ar.beginTransform(marker);
 
@@ -150,12 +146,6 @@ public void keyPressed() {
 
 public void captureEvent(Capture c) {
   c.read();
-}
-
-private void applyBlur() {
-  tint(color(255), 180);
-  image(previous, 0, 0);
-  noTint();
 }
 
 private void drawBackground(int part, PImage image) {
